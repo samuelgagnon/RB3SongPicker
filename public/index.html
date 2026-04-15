@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RB3 Song Picker</title>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <h1>RB3 Song Picker 🎸</h1>
+      <nav class="page-tabs">
+        <button id="songsPageButton" class="tab-button active">Songs 🎶</button>
+        <button id="adminPageButton" class="tab-button admin-link" title="Admin">⚙️</button>
+      </nav>
+    </header>
+
+    <section id="songsPage">
+      <section class="panel control-panel">
+        <div class="panel-header">
+          <h2>Song lists</h2>
+        </div>
+        <div class="panel-body">
+          <div class="row songlist-controls">
+            <label class="songlist-select">
+              Apply song list filter
+              <select id="songListSelect">
+                <option value="">All songs</option>
+              </select>
+            </label>
+            <div class="songlist-actions hidden" id="managementActions">
+              <button id="newListButton" class="secondary">New list ➕</button>
+              <button id="editListButton" class="secondary" disabled>Edit ✏️</button>
+              <button id="deleteListButton" class="danger" disabled>Delete 🗑️</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel songs-panel">
+        <div class="panel-header">
+          <div>
+            <h2>Songs</h2>
+            <p id="summaryText">Loading songs...</p>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="row search-row">
+            <input id="searchInput" type="search" placeholder="Search all columns" />
+            <div class="random-group">
+              <button id="randomButton" class="primary">Random 🎲</button>
+              <button id="randomMenuButton" class="secondary split-button" aria-expanded="false" aria-haspopup="true">▾</button>
+              <div id="randomMenu" class="dropdown-menu hidden" role="menu">
+                <button id="randomUnpopularButton" type="button" role="menuitem">Random unpopular</button>
+                <button id="randomPopularButton" type="button" role="menuitem">Random popular</button>
+              </div>
+            </div>
+          </div>
+          <div class="sort-buttons hidden" id="sortButtons"></div>
+          <div id="listEditor" class="list-editor hidden">
+            <label>
+              List name
+              <input id="listName" type="text" placeholder="Enter list name" />
+            </label>
+            <div class="row button-row">
+              <button id="saveListButton" class="primary">Save list ✅</button>
+              <button id="cancelListButton" class="secondary">Cancel ❌</button>
+            </div>
+            <p class="hint">In list edit mode, row controls become <strong>+</strong> or <strong>−</strong>. The full library is shown while editing.</p>
+          </div>
+          <div class="song-table-wrapper" id="songTableWrapper">
+            <table id="songsTable">
+              <thead>
+                <tr>
+                  <th class="sortable" data-sort="title">Title <span class="sort-icon"></span></th>
+                  <th class="sortable" data-sort="artist">Artist <span class="sort-icon"></span></th>
+                  <th class="sortable album-header" data-sort="album">Album <span class="sort-icon"></span></th>
+                  <th class="sortable origin-header" data-sort="origin">Origin <span class="sort-icon"></span></th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="goto-controls hidden" id="gotoControls">
+              <button id="gotoUp" type="button" class="small-button secondary" aria-label="Go to previous letter">▲</button>
+              <button id="gotoDown" type="button" class="small-button secondary" aria-label="Go to next letter">▼</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+
+    <section id="adminPage" class="hidden">
+      <section class="panel config-panel">
+        <div class="panel-header">
+          <h2>Admin</h2>
+        </div>
+        <div class="panel-body config-grid">
+          <label>
+            Xbox IP address
+            <input id="xboxIp" type="text" placeholder="192.168.0.100" />
+          </label>
+          <label>
+            Xbox port
+            <input id="xboxPort" type="number" placeholder="21070" min="1" max="65535" />
+          </label>
+          <button id="saveConfigButton" class="secondary">Save config 💾</button>
+        </div>
+        <div class="panel-body admin-actions">
+          <label class="toggle-checkbox">
+            <input id="showListManagement" type="checkbox" />
+            Enable song list management
+          </label>
+          <button id="refreshButton" class="primary">Refresh library 🔄</button>
+        </div>
+        <p class="hint">Make sure <code>EnableHTTPServer=true</code> in <code>rb3.ini</code> on the Xbox.</p>
+      </section>
+    </section>
+
+    <footer class="footer">RB3 Song Picker - proxy UI for localized Xbox web server</footer>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
