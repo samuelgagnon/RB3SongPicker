@@ -31,6 +31,7 @@ const elements = {
   listEditor: document.getElementById('listEditor'),
   songTableWrapper: document.getElementById('songTableWrapper'),
   gotoControls: document.getElementById('gotoControls'),
+  gotoTop: document.getElementById('gotoTop'),
   gotoUp: document.getElementById('gotoUp'),
   gotoDown: document.getElementById('gotoDown'),
   listName: document.getElementById('listName'),
@@ -260,6 +261,10 @@ function scrollToSongIndex(index) {
   row.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function scrollToTop() {
+  scrollToSongIndex(0);
+}
+
 function navigateGroup(direction) {
   if (!state.songs.length) return;
   const groups = getSongGroupList();
@@ -481,6 +486,7 @@ function attachEvents() {
   elements.saveConfigButton.addEventListener('click', saveConfig);
   elements.refreshButton.addEventListener('click', refreshLibrary);
   elements.showListManagement.addEventListener('change', saveSettings);
+  elements.gotoTop.addEventListener('click', scrollToTop);
   elements.gotoUp.addEventListener('click', () => navigateGroup(-1));
   elements.gotoDown.addEventListener('click', () => navigateGroup(1));
   elements.pageButtons.songs.addEventListener('click', () => setPage('songs'));
