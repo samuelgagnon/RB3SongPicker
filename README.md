@@ -22,8 +22,9 @@ A local Node.js single-page web app for Rock Band 3 Enhanced.
 
 1. Open a terminal in `e:\Git\RB3SongPicker`.
 2. Run `npm install`.
-3. Start the server with `npm start`.
-4. Open `http://localhost:3000` in your browser.
+3. If you want to preconfigure the Xbox address, copy `config.example.json` to `config.json` and edit it.
+4. Start the server with `npm start`.
+5. Open `http://localhost:3000` in your browser.
 
 ## Requirements
 
@@ -31,13 +32,15 @@ A local Node.js single-page web app for Rock Band 3 Enhanced.
 
 ## Configuration
 
-- Set the Xbox IP address and port in the UI, or edit `config.json` directly.
+- Set the Xbox IP address and port in the UI, or copy `config.example.json` to `config.json` and edit it.
+- `config.json` is generated locally on first run and is excluded from version control.
 - Make sure `EnableHTTPServer=true` in `rb3.ini` on the Xbox.
 - The app expects the Xbox web server to be reachable via `http://<xboxIp>:<xboxPort>`.
 
 ## Data storage
 
 - Songs are stored in `songs.sqlite`.
+- The local database file is created empty on first run and excluded from version control.
 - Custom song lists are stored in the local database.
 - Pick counts are tracked per song in the local database.
 

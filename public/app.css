@@ -281,8 +281,18 @@ select {
   border: 1px solid rgba(148, 163, 184, 0.24);
   border-radius: 12px;
   padding: 12px 14px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(15, 23, 42, 0.92);
   color: #e2e8f0;
+}
+
+select option,
+select optgroup {
+  background: rgba(15, 23, 42, 0.98);
+  color: #e2e8f0;
+}
+
+select:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
 }
 
 input[type='search'] {
@@ -296,13 +306,19 @@ input[type='search'] {
 }
 
 .search-row {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 1fr;
   align-items: stretch;
+  justify-items: end;
 }
 
 .search-row input[type='search'],
 .search-row .random-group {
   min-width: 0;
+}
+
+.search-row .random-group {
+  order: -1;
+  justify-self: end;
 }
 
 .random-group {
@@ -562,10 +578,26 @@ input[type='search'] {
   right: 12px;
   bottom: 12px;
   display: flex;
+  align-items: center;
   gap: 8px;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s ease;
   z-index: 5;
+}
+
+.goto-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.goto-controls.collapsed .goto-actions {
+  display: none;
+}
+
+.goto-toggle {
+  min-width: 40px;
+  width: auto;
 }
 
 .song-table-wrapper:hover .goto-controls {
@@ -635,13 +667,33 @@ th:last-child {
   }
 
   .topbar {
-    align-items: flex-start;
-    flex-wrap: wrap;
+    position: relative;
+    align-items: center;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  .topbar h1 {
+    padding-right: 100px;
   }
 
   .page-tabs {
     margin-left: auto;
     justify-content: flex-end;
+    flex-wrap: nowrap;
+    min-width: 0;
+    padding-right: 56px;
+  }
+
+  .page-tabs > * {
+    flex-shrink: 0;
+  }
+
+  .page-tabs .admin-link {
+    position: absolute;
+    top: 50%;
+    right: 14px;
+    transform: translateY(-50%);
   }
 
   .search-row {
@@ -650,7 +702,7 @@ th:last-child {
   }
 
   .random-group {
-    justify-self: flex-end;
+    justify-self: end;
     width: auto;
   }
 
@@ -721,6 +773,21 @@ th:last-child {
     left: auto;
     margin: 0;
     z-index: 20;
+    background: rgba(15, 23, 42, 0.95);
+    padding: 8px;
+    border-radius: 999px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transform: translateZ(0);
+  }
+}
+
+@media (min-width: 761px) {
+  .goto-controls {
+    position: fixed;
+    bottom: 14px;
+    right: 14px;
+    top: auto;
+    opacity: 1;
     background: rgba(15, 23, 42, 0.95);
     padding: 8px;
     border-radius: 999px;

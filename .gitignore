@@ -1,4 +1,7 @@
 node_modules/
+config.json
 songs.sqlite
+songs.sqlite-shm
+songs.sqlite-wal
 *.log
 .DS_Store

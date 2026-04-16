@@ -51,9 +51,15 @@ function openDatabase() {
         artist TEXT,
         album TEXT,
         origin TEXT,
-        updated_at TEXT
+        updated_at TEXT,
+        present INTEGER NOT NULL DEFAULT 1
       )`
     );
+    db.all('PRAGMA table_info(songs)', (err, rows) => {
+      if (!err && rows && !rows.some((column) => column.name === 'present')) {
+        db.run('ALTER TABLE songs ADD COLUMN present INTEGER NOT NULL DEFAULT 1');
+      }
+    });
     db.run(
       `CREATE TABLE IF NOT EXISTS picks (
         shortname TEXT PRIMARY KEY,
@@ -206,7 +212,7 @@ app.get('/api/songs', wrapAsync(async (req, res) => {
     FROM songs s
     LEFT JOIN picks p ON s.shortname = p.shortname`;
 
-  const conditions = [];
+  const conditions = ['s.present = 1'];
   const params = [];
 
   if (listId) {
@@ -242,17 +248,19 @@ app.post('/api/songs/refresh', wrapAsync(async (req, res) => {
   }
 
   await promisifyRun(db, 'BEGIN TRANSACTION');
+  await promisifyRun(db, 'UPDATE songs SET present = 0');
   for (const song of songs) {
     await promisifyRun(
       db,
-      `INSERT INTO songs (shortname, title, artist, album, origin, updated_at)
-       VALUES (?, ?, ?, ?, ?, datetime('now'))
+      `INSERT INTO songs (shortname, title, artist, album, origin, updated_at, present)
+       VALUES (?, ?, ?, ?, ?, datetime('now'), 1)
        ON CONFLICT(shortname) DO UPDATE SET
          title = excluded.title,
          artist = excluded.artist,
          album = excluded.album,
          origin = excluded.origin,
-         updated_at = datetime('now')`,
+         updated_at = datetime('now'),
+         present = 1`,
       [song.shortname, song.title, song.artist, song.album, song.origin]
     );
     await promisifyRun(db, 'INSERT OR IGNORE INTO picks (shortname, count) VALUES (?, 0)', [song.shortname]);

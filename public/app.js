@@ -32,6 +32,7 @@ const elements = {
   listEditor: document.getElementById('listEditor'),
   songTableWrapper: document.getElementById('songTableWrapper'),
   gotoControls: document.getElementById('gotoControls'),
+  gotoToggle: document.getElementById('gotoToggle'),
   gotoTop: document.getElementById('gotoTop'),
   gotoUp: document.getElementById('gotoUp'),
   gotoDown: document.getElementById('gotoDown'),
@@ -297,6 +298,23 @@ function updateGotoControls() {
   elements.gotoControls.classList.toggle('hidden', !shouldShow);
 }
 
+function updateGotoDefaultState() {
+  if (!elements.gotoControls) return;
+  if (window.innerWidth <= 760) {
+    elements.gotoControls.classList.remove('collapsed');
+    elements.gotoControls.classList.add('expanded');
+  } else {
+    elements.gotoControls.classList.add('collapsed');
+    elements.gotoControls.classList.remove('expanded');
+  }
+}
+
+function toggleGotoNavigation() {
+  if (!elements.gotoControls) return;
+  elements.gotoControls.classList.toggle('collapsed');
+  elements.gotoControls.classList.toggle('expanded');
+}
+
 function updateSortHeaders() {
   elements.tableHeaders.forEach((header) => {
     const sortKey = header.dataset.sort;
@@ -517,6 +535,8 @@ function attachEvents() {
   elements.randomUnpopularButton.addEventListener('click', () => pickRandom('unpopular'));
   elements.randomPopularButton.addEventListener('click', () => pickRandom('popular'));
   document.addEventListener('click', closeRandomMenu);
+  elements.gotoToggle?.addEventListener('click', toggleGotoNavigation);
+  window.addEventListener('resize', updateGotoDefaultState);
   elements.newListButton.addEventListener('click', beginNewList);
   elements.editListButton.addEventListener('click', beginEditList);
   elements.deleteListButton.addEventListener('click', deleteSongList);
@@ -570,6 +590,7 @@ function renderSortButtons() {
 
 async function init() {
   attachEvents();
+  updateGotoDefaultState();
   renderSortButtons();
   updateSortHeaders();
   renderQrImage();

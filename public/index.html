@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RB3 Song Picker</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%8E%B8%3C/text%3E%3C/svg%3E" />
   <link rel="stylesheet" href="app.css" />
 </head>
 <body>
@@ -82,10 +83,13 @@
               </thead>
               <tbody></tbody>
             </table>
-            <div class="goto-controls hidden" id="gotoControls">
-              <button id="gotoTop" type="button" class="small-button secondary" aria-label="Go to top">⏫</button>
-              <button id="gotoUp" type="button" class="small-button secondary" aria-label="Go to previous letter">▲</button>
-              <button id="gotoDown" type="button" class="small-button secondary" aria-label="Go to next letter">▼</button>
+            <div class="goto-controls collapsed" id="gotoControls">
+              <button id="gotoToggle" type="button" class="small-button secondary goto-toggle" aria-label="Toggle navigation">☰</button>
+              <div class="goto-actions">
+                <button id="gotoTop" type="button" class="small-button secondary" aria-label="Go to top">⏫</button>
+                <button id="gotoUp" type="button" class="small-button secondary" aria-label="Go to previous letter">▲</button>
+                <button id="gotoDown" type="button" class="small-button secondary" aria-label="Go to next letter">▼</button>
+              </div>
             </div>
           </div>
         </div>
