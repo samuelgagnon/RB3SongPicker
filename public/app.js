@@ -18,6 +18,7 @@ const elements = {
   saveConfigButton: document.getElementById('saveConfigButton'),
   refreshButton: document.getElementById('refreshButton'),
   showListManagement: document.getElementById('showListManagement'),
+  qrImage: document.getElementById('qrImage'),
   searchInput: document.getElementById('searchInput'),
   randomButton: document.getElementById('randomButton'),
   randomMenuButton: document.getElementById('randomMenuButton'),
@@ -66,6 +67,14 @@ async function apiFetch(url, options = {}) {
     throw new Error(message || 'Request failed');
   }
   return res.json();
+}
+
+function renderQrImage() {
+  if (!elements.qrImage) return;
+  const url = window.location.href;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}`;
+  elements.qrImage.src = qrUrl;
+  elements.qrImage.alt = `Scan to open ${url}`;
 }
 
 async function loadConfig() {
@@ -563,6 +572,7 @@ async function init() {
   attachEvents();
   renderSortButtons();
   updateSortHeaders();
+  renderQrImage();
   await loadSettings();
   await loadSongLists();
   setPage('songs');

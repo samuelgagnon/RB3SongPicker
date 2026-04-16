@@ -97,7 +97,22 @@
         <div class="panel-header">
           <h2>Admin</h2>
         </div>
-        <div class="panel-body config-grid">
+        <div class="panel-body qr-panel">
+          <div class="qr-preview">
+            <img id="qrImage" src="" alt="Scan to open" />
+          </div>
+          <p class="qr-note">Scan from your phone to join the party🔥!</p>
+        </div>
+        <div class="panel-body session-panel">
+          <div class="panel-subtitle">Current session</div>
+          <label class="toggle-checkbox">
+            <input id="showListManagement" type="checkbox" />
+            Enable song list management
+          </label>
+        </div>
+        <div class="panel-body config-grid server-panel">
+          <div class="panel-subtitle">Server settings</div>
+          <p class="hint config-hint">Make sure <code>EnableHTTPServer=true</code> in <code>rb3.ini</code> on the Xbox.</p>
           <label>
             Xbox IP address
             <input id="xboxIp" type="text" placeholder="192.168.0.100" />
@@ -107,15 +122,9 @@
             <input id="xboxPort" type="number" placeholder="21070" min="1" max="65535" />
           </label>
           <button id="saveConfigButton" class="secondary">Save config 💾</button>
-        </div>
-        <div class="panel-body admin-actions">
-          <label class="toggle-checkbox">
-            <input id="showListManagement" type="checkbox" />
-            Enable song list management
-          </label>
+          <p class="hint refresh-hint">Refresh library reloads the song data from the Xbox server.</p>
           <button id="refreshButton" class="primary">Refresh library 🔄</button>
         </div>
-        <p class="hint">Make sure <code>EnableHTTPServer=true</code> in <code>rb3.ini</code> on the Xbox.</p>
       </section>
     </section>
 

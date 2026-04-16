@@ -2,15 +2,21 @@
 
 A local Node.js single-page web app for Rock Band 3 Enhanced.
 
-## What it does
+## Features
 
 - Proxies Xbox HTTP server calls through a local Node.js backend.
-- Loads and persists the Xbox song library in a local SQLite database.
-- Tracks total pick counts per song.
+- Loads and caches the Xbox song library locally in `songs.sqlite`.
+- Refreshes the stored library from the Xbox server on demand.
+- Tracks total pick counts for every song.
+- Supports random song selection with a dropdown for all/random unpopular/random popular picks.
+- Supports searching the library across all fields.
 - Supports sorting by title, artist, album, origin, and pick count.
-- Includes a master search across all song fields.
-- Allows creating, editing, applying, and deleting custom song lists.
-- Refreshes the stored library from the Xbox server.
+- Displays the current song count and updates dynamically.
+- Provides a responsive mobile-friendly UI.
+- Allows creating, editing, deleting, and applying custom song lists.
+- Stores song lists and settings locally in the app database.
+- Includes an admin page for server config and feature toggles.
+- Lets you update Xbox IP and port from the UI or via `config.json`.
 
 ## Setup
 
@@ -19,14 +25,23 @@ A local Node.js single-page web app for Rock Band 3 Enhanced.
 3. Start the server with `npm start`.
 4. Open `http://localhost:3000` in your browser.
 
+## Requirements
+
+- Node.js 18 or newer (built-in `fetch` is required).
+
 ## Configuration
 
 - Set the Xbox IP address and port in the UI, or edit `config.json` directly.
 - Make sure `EnableHTTPServer=true` in `rb3.ini` on the Xbox.
 - The app expects the Xbox web server to be reachable via `http://<xboxIp>:<xboxPort>`.
 
+## Data storage
+
+- Songs are stored in `songs.sqlite`.
+- Custom song lists are stored in the local database.
+- Pick counts are tracked per song in the local database.
+
 ## Notes
 
-- The app stores the song library in `songs.sqlite`.
-- Song lists are saved to the local database and can be reused.
-- The UI is served from the Node.js server, so all calls proxy through the backend.
+- The app uses `/list_songs` to refresh the library and `/jump?shortname=...` to select a song on the Xbox.
+- All browser UI requests are proxied through the backend server at `http://localhost:3000`.
