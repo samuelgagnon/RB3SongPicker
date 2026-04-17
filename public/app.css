@@ -480,15 +480,32 @@ input[type='search'] {
 }
 
 .songlist-controls {
-  grid-template-columns: minmax(220px, 1fr) auto;
-  align-items: center;
+  grid-template-columns: 1fr;
+  align-items: stretch;
 }
 
 .songlist-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  justify-content: flex-start;
+}
+
+.list-editor {
+  display: grid;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.list-editor label {
+  display: grid;
+  gap: 8px;
+}
+
+.list-editor .button-row {
+  margin-top: 0;
 }
 
 .hidden {
@@ -545,17 +562,6 @@ input[type='search'] {
 .sort-button.active,
 .sort-button:hover {
   background: rgba(59, 130, 246, 0.16);
-}
-
-.songlist-controls {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 14px;
-  align-items: center;
-}
-
-.list-editor {
-  gap: 12px;
 }
 
 .hidden {

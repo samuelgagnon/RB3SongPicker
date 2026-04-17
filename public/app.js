@@ -36,6 +36,7 @@ const elements = {
   gotoTop: document.getElementById('gotoTop'),
   gotoUp: document.getElementById('gotoUp'),
   gotoDown: document.getElementById('gotoDown'),
+  gotoBottom: document.getElementById('gotoBottom'),
   listName: document.getElementById('listName'),
   saveListButton: document.getElementById('saveListButton'),
   cancelListButton: document.getElementById('cancelListButton'),
@@ -268,11 +269,15 @@ function getCurrentTopGroup() {
 function scrollToSongIndex(index) {
   const row = elements.songsTableBody.children[index];
   if (!row) return;
-  row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  row.scrollIntoView({ behavior: 'auto', block: 'start' });
 }
 
 function scrollToTop() {
-  scrollToSongIndex(0);
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+function scrollToBottom() {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'auto' });
 }
 
 function navigateGroup(direction) {
@@ -473,7 +478,7 @@ async function saveSongList() {
 
 async function deleteSongList() {
   if (!state.selectedListId) return;
-  if (!confirm('Delete the selected song list?')) return;
+  if (!confirm('Are you sure you want to delete the selected song list?')) return;
   const listId = state.selectedListId;
   try {
     await apiFetch(`/api/songlists/${listId}`, { method: 'DELETE' });
@@ -516,6 +521,7 @@ function attachEvents() {
   elements.gotoTop.addEventListener('click', scrollToTop);
   elements.gotoUp.addEventListener('click', () => navigateGroup(-1));
   elements.gotoDown.addEventListener('click', () => navigateGroup(1));
+  elements.gotoBottom.addEventListener('click', scrollToBottom);
   elements.pageButtons.songs.addEventListener('click', () => setPage('songs'));
   elements.pageButtons.admin.addEventListener('click', () => setPage('admin'));
   elements.searchInput.addEventListener('input', async (event) => {

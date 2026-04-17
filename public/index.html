@@ -47,6 +47,17 @@
           </div>
         </div>
         <div class="panel-body">
+          <div id="listEditor" class="list-editor hidden">
+            <label>
+              List name
+              <input id="listName" type="text" placeholder="Enter list name" />
+            </label>
+            <div class="row button-row">
+              <button id="saveListButton" class="primary">Save list ✅</button>
+              <button id="cancelListButton" class="secondary">Cancel ❌</button>
+            </div>
+            <p class="hint">In list edit mode, row controls become <strong>+</strong> or <strong>−</strong>. The full library is shown while editing.</p>
+          </div>
           <div class="row search-row">
             <input id="searchInput" type="search" placeholder="Search all columns" />
             <div class="random-group">
@@ -59,17 +70,6 @@
             </div>
           </div>
           <div class="sort-buttons hidden" id="sortButtons"></div>
-          <div id="listEditor" class="list-editor hidden">
-            <label>
-              List name
-              <input id="listName" type="text" placeholder="Enter list name" />
-            </label>
-            <div class="row button-row">
-              <button id="saveListButton" class="primary">Save list ✅</button>
-              <button id="cancelListButton" class="secondary">Cancel ❌</button>
-            </div>
-            <p class="hint">In list edit mode, row controls become <strong>+</strong> or <strong>−</strong>. The full library is shown while editing.</p>
-          </div>
           <div class="song-table-wrapper" id="songTableWrapper">
             <table id="songsTable">
               <thead>
@@ -86,9 +86,10 @@
             <div class="goto-controls collapsed" id="gotoControls">
               <button id="gotoToggle" type="button" class="small-button secondary goto-toggle" aria-label="Toggle navigation">☰</button>
               <div class="goto-actions">
-                <button id="gotoTop" type="button" class="small-button secondary" aria-label="Go to top">⏫</button>
+                <button id="gotoTop" type="button" class="small-button secondary" aria-label="Go to page top">▲▲</button>
                 <button id="gotoUp" type="button" class="small-button secondary" aria-label="Go to previous letter">▲</button>
                 <button id="gotoDown" type="button" class="small-button secondary" aria-label="Go to next letter">▼</button>
+                <button id="gotoBottom" type="button" class="small-button secondary" aria-label="Go to page bottom">▼▼</button>
               </div>
             </div>
           </div>

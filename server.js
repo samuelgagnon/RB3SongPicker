@@ -222,9 +222,12 @@ app.get('/api/songs', wrapAsync(async (req, res) => {
   }
 
   if (search) {
-    conditions.push('(s.title LIKE ? OR s.artist LIKE ? OR s.album LIKE ? OR s.shortname LIKE ? OR s.origin LIKE ?)');
-    const wildcard = `%${search}%`;
-    params.push(wildcard, wildcard, wildcard, wildcard, wildcard);
+    const tokens = search.split(/\s+/).filter(Boolean);
+    for (const token of tokens) {
+      conditions.push('(s.title LIKE ? COLLATE NOCASE OR s.artist LIKE ? COLLATE NOCASE OR s.album LIKE ? COLLATE NOCASE OR s.origin LIKE ? COLLATE NOCASE)');
+      const wildcard = `%${token}%`;
+      params.push(wildcard, wildcard, wildcard, wildcard);
+    }
   }
 
   if (conditions.length) {
