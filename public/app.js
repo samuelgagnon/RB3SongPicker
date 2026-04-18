@@ -368,8 +368,16 @@ function pickRandom(type) {
       setStatus('No popular songs have been picked yet.', true);
       return;
     }
-    const maxPicks = Math.max(...candidates.map((song) => song.picks || 0));
-    candidates = candidates.filter((song) => (song.picks || 0) === maxPicks);
+
+    const totalWeight = candidates.reduce((sum, song) => sum + (song.picks || 0), 0);
+    let seed = Math.random() * totalWeight;
+    for (const song of candidates) {
+      seed -= (song.picks || 0);
+      if (seed < 0) {
+        candidates = [song];
+        break;
+      }
+    }
   }
 
   if (!candidates.length) {
