@@ -43,13 +43,27 @@ function createApiRouter({ db, configStore, xboxService }) {
 
   router.get('/settings', wrapAsync(async (req, res) => {
     const showSongListManagement = await db.getSetting('showSongListManagement', 'false');
-    res.json({ showSongListManagement: showSongListManagement === 'true' });
+    const showDuplicateFilterButton = await db.getSetting('showDuplicateFilterButton', 'false');
+    const showShortnameColumn = await db.getSetting('showShortnameColumn', 'false');
+    res.json({ 
+      showSongListManagement: showSongListManagement === 'true',
+      showDuplicateFilterButton: showDuplicateFilterButton === 'true',
+      showShortnameColumn: showShortnameColumn === 'true'
+    });
   }));
 
   router.post('/settings', wrapAsync(async (req, res) => {
     const showSongListManagement = req.body.showSongListManagement === true;
+    const showDuplicateFilterButton = req.body.showDuplicateFilterButton === true;
+    const showShortnameColumn = req.body.showShortnameColumn === true;
     await db.setSetting('showSongListManagement', showSongListManagement ? 'true' : 'false');
-    res.json({ showSongListManagement });
+    await db.setSetting('showDuplicateFilterButton', showDuplicateFilterButton ? 'true' : 'false');
+    await db.setSetting('showShortnameColumn', showShortnameColumn ? 'true' : 'false');
+    res.json({ 
+      showSongListManagement,
+      showDuplicateFilterButton,
+      showShortnameColumn
+    });
   }));
 
   router.get('/songs', wrapAsync(async (req, res) => {
@@ -57,6 +71,7 @@ function createApiRouter({ db, configStore, xboxService }) {
     const sort = String(req.query.sort || 'title').toLowerCase();
     const order = String(req.query.order || 'asc').toLowerCase();
     const listId = req.query.listId ? Number(req.query.listId) : null;
+    const filterDuplicates = req.query.filterDuplicates === 'true';
 
     let query = `SELECT s.shortname, s.title, s.artist, s.album, s.origin, IFNULL(p.count, 0) AS picks
       FROM songs s
@@ -65,19 +80,31 @@ function createApiRouter({ db, configStore, xboxService }) {
     const conditions = ['s.present = 1'];
     const params = [];
 
-    if (listId) {
+    if (listId && !filterDuplicates) {
       query += ' JOIN songlist_items li ON li.shortname = s.shortname';
       conditions.push('li.list_id = ?');
       params.push(listId);
     }
 
-    if (conditions.length) {
-      query += ' WHERE ' + conditions.join(' AND ');
+    if (filterDuplicates) {
+      query += ` WHERE s.present = 1 AND (s.title, s.artist) IN (
+        SELECT title, artist FROM songs WHERE present = 1 GROUP BY title, artist HAVING COUNT(*) > 1
+      )`;
+      if (listId) {
+        query += ` AND s.shortname IN (SELECT shortname FROM songlist_items WHERE list_id = ?)`;
+        params.push(listId);
+      }
+      const orderBy = ALLOWED_SONG_SORT_COLUMNS.includes(sort) ? sort : 'title';
+      const direction = order === 'desc' ? 'DESC' : 'ASC';
+      query += ` ORDER BY ${orderBy} ${direction}`;
+    } else {
+      if (conditions.length) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+      const orderBy = ALLOWED_SONG_SORT_COLUMNS.includes(sort) ? sort : 'title';
+      const direction = order === 'desc' ? 'DESC' : 'ASC';
+      query += ` ORDER BY ${orderBy} ${direction}`;
     }
-
-    const orderBy = ALLOWED_SONG_SORT_COLUMNS.includes(sort) ? sort : 'title';
-    const direction = order === 'desc' ? 'DESC' : 'ASC';
-    query += ` ORDER BY ${orderBy} ${direction}`;
 
     const songs = await db.promisifyAll(query, params);
 

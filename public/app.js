@@ -8,6 +8,9 @@ const state = {
   sortOrder: 'asc',
   editingList: null,
   showSongListManagement: false,
+  showDuplicateFilterButton: false,
+  showShortnameColumn: false,
+  filterDuplicates: false,
   saving: false,
   loading: false
 };
@@ -18,6 +21,9 @@ const elements = {
   saveConfigButton: document.getElementById('saveConfigButton'),
   refreshButton: document.getElementById('refreshButton'),
   showListManagement: document.getElementById('showListManagement'),
+  showDuplicateFilterButton: document.getElementById('showDuplicateFilterButton'),
+  showShortnameColumn: document.getElementById('showShortnameColumn'),
+  duplicateFilterButton: document.getElementById('duplicateFilterButton'),
   qrImage: document.getElementById('qrImage'),
   searchInput: document.getElementById('searchInput'),
   randomButton: document.getElementById('randomButton'),
@@ -118,8 +124,11 @@ async function loadSettings() {
   try {
     const data = await apiFetch('/api/settings');
     state.showSongListManagement = Boolean(data.showSongListManagement);
+    state.showDuplicateFilterButton = Boolean(data.showDuplicateFilterButton);
     elements.showListManagement.checked = state.showSongListManagement;
+    elements.showDuplicateFilterButton.checked = state.showDuplicateFilterButton;
     renderSongListOptions();
+    updateDuplicateFilterButtonVisibility();
   } catch (error) {
     setStatus(`Cannot load settings: ${error.message}`, true);
   }
@@ -127,15 +136,23 @@ async function loadSettings() {
 
 async function saveSettings() {
   try {
-    const payload = { showSongListManagement: elements.showListManagement.checked };
+    const payload = { 
+      showSongListManagement: elements.showListManagement.checked,
+      showDuplicateFilterButton: elements.showDuplicateFilterButton.checked,
+      showShortnameColumn: elements.showShortnameColumn.checked
+    };
     const data = await apiFetch('/api/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
     state.showSongListManagement = Boolean(data.showSongListManagement);
+    state.showDuplicateFilterButton = Boolean(data.showDuplicateFilterButton);
+    state.showShortnameColumn = Boolean(data.showShortnameColumn);
     renderSongListOptions();
-    setStatus('Song list management setting saved.');
+    updateDuplicateFilterButtonVisibility();
+    updateShortnameColumnVisibility();
+    setStatus('Settings saved.');
   } catch (error) {
     setStatus(`Cannot save settings: ${error.message}`, true);
   }
@@ -160,6 +177,25 @@ function renderSongListOptions() {
   }
 }
 
+function updateDuplicateFilterButtonVisibility() {
+  if (!elements.duplicateFilterButton) return;
+
+  if (state.showDuplicateFilterButton) {
+    elements.duplicateFilterButton.classList.remove('hidden');
+    elements.duplicateFilterButton.style.display = '';
+  } else {
+    elements.duplicateFilterButton.classList.add('hidden');
+    elements.duplicateFilterButton.style.display = 'none';
+    state.filterDuplicates = false;
+    elements.duplicateFilterButton.classList.remove('active');
+  }
+}
+
+function updateShortnameColumnVisibility() {
+  if (!elements.songTableWrapper) return;
+  elements.songTableWrapper.classList.toggle('shortname-enabled', state.showShortnameColumn);
+}
+
 async function loadSongs() {
   state.loading = true;
   try {
@@ -168,11 +204,18 @@ async function loadSongs() {
     params.set('sort', state.sortBy);
     params.set('order', state.sortOrder);
     if (state.selectedListId && !state.editingList) params.set('listId', state.selectedListId);
+    if (state.filterDuplicates) params.set('filterDuplicates', 'true');
     const data = await apiFetch(`/api/songs?${params.toString()}`);
     state.songs = data.songs || [];
     renderSongTable();
-    const listMessage = state.editingList ? ' (editing list, full library shown)' : state.selectedListId ? ' from selected song list' : '';
-    setStatus(`Showing ${state.songs.length} songs${listMessage}.`);
+    let listMessage = '';
+    if (state.editingList) {
+      listMessage = ' (editing list, full library shown)';
+    } else if (state.selectedListId) {
+      listMessage = ' from selected song list';
+    }
+    const filterMessage = state.filterDuplicates ? ' (duplicates only)' : '';
+    setStatus(`Showing ${state.songs.length} songs${listMessage}${filterMessage}.`);
   } catch (error) {
     setStatus(`Cannot load songs: ${error.message}`, true);
   } finally {
@@ -184,7 +227,7 @@ function renderSongTable() {
   elements.songsTableBody.innerHTML = '';
   if (!state.songs.length) {
     const emptyRow = document.createElement('tr');
-    emptyRow.innerHTML = '<td colspan="5" class="empty-row">No songs found.</td>';
+    emptyRow.innerHTML = '<td colspan="6" class="empty-row">No songs found.</td>';
     elements.songsTableBody.append(emptyRow);
     updateGotoControls();
     return;
@@ -205,6 +248,7 @@ function renderSongTable() {
       <td class="artist-cell">${song.artist || '—'}</td>
       <td class="album-cell">${song.album || '—'}</td>
       <td class="origin-cell">${song.origin || '—'}</td>
+      <td class="shortname-column">${song.shortname || '—'}</td>
       <td class="action-cell"></td>
     `;
 
@@ -350,6 +394,12 @@ function closeRandomMenu() {
     elements.randomMenu.classList.add('hidden');
     elements.randomMenuButton.setAttribute('aria-expanded', 'false');
   }
+}
+
+function toggleDuplicateFilter() {
+  state.filterDuplicates = !state.filterDuplicates;
+  elements.duplicateFilterButton.classList.toggle('active', state.filterDuplicates);
+  loadSongs();
 }
 
 function pickRandom(type) {
@@ -526,6 +576,9 @@ function attachEvents() {
   elements.saveConfigButton.addEventListener('click', saveConfig);
   elements.refreshButton.addEventListener('click', refreshLibrary);
   elements.showListManagement.addEventListener('change', saveSettings);
+  elements.showDuplicateFilterButton.addEventListener('change', saveSettings);
+  elements.showShortnameColumn.addEventListener('change', saveSettings);
+  elements.duplicateFilterButton.addEventListener('click', toggleDuplicateFilter);
   elements.gotoTop.addEventListener('click', scrollToTop);
   elements.gotoUp.addEventListener('click', () => navigateGroup(-1));
   elements.gotoDown.addEventListener('click', () => navigateGroup(1));
@@ -608,6 +661,10 @@ async function init() {
   renderSortButtons();
   updateSortHeaders();
   renderQrImage();
+  if (elements.duplicateFilterButton) {
+    elements.duplicateFilterButton.classList.add('hidden');
+    elements.duplicateFilterButton.style.display = 'none';
+  }
   await loadSettings();
   await loadSongLists();
   setPage('songs');

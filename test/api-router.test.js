@@ -22,7 +22,9 @@ describe('API Router - /songs/refresh', () => {
     db = {
       promisifyRun: jest.fn().mockResolvedValue(),
       promisifyAll: jest.fn().mockResolvedValue([]),
-      promisifyGet: jest.fn().mockResolvedValue(null)
+      promisifyGet: jest.fn().mockResolvedValue(null),
+      getSetting: jest.fn().mockResolvedValue('false'),
+      setSetting: jest.fn().mockResolvedValue()
     };
 
     configStore = {
@@ -153,6 +155,85 @@ origin=rb3_dlc
 
       expect(response.body).toEqual({
         error: 'Cannot connect to Xbox'
+      });
+    });
+  });
+
+  describe('GET /api/songs', () => {
+    it('should apply duplicate filter when requested', async () => {
+      db.promisifyAll.mockResolvedValue([
+        { shortname: 'song1', title: 'Test Song', artist: 'Shared Artist', album: 'A', origin: 'rb3', picks: 0 },
+        { shortname: 'song2', title: 'Test Song', artist: 'Shared Artist', album: 'B', origin: 'rb3_dlc', picks: 0 }
+      ]);
+
+      const response = await request(app)
+        .get('/api/songs')
+        .query({ filterDuplicates: 'true' })
+        .expect(200);
+
+      expect(response.body).toEqual({
+        songs: [
+          { shortname: 'song1', title: 'Test Song', artist: 'Shared Artist', album: 'A', origin: 'rb3', picks: 0 },
+          { shortname: 'song2', title: 'Test Song', artist: 'Shared Artist', album: 'B', origin: 'rb3_dlc', picks: 0 }
+        ]
+      });
+      expect(db.promisifyAll).toHaveBeenCalledWith(
+        expect.stringContaining('GROUP BY title, artist HAVING COUNT(*) > 1'),
+        []
+      );
+    });
+
+    it('should include list filter when duplicate filter is enabled', async () => {
+      db.promisifyAll.mockResolvedValue([
+        { shortname: 'song1', title: 'Test Song', artist: 'Shared Artist', album: 'A', origin: 'rb3', picks: 0 }
+      ]);
+
+      const response = await request(app)
+        .get('/api/songs')
+        .query({ listId: '5', filterDuplicates: 'true' })
+        .expect(200);
+
+      expect(response.body.songs).toHaveLength(1);
+      expect(db.promisifyAll).toHaveBeenCalledWith(
+        expect.stringContaining('AND s.shortname IN (SELECT shortname FROM songlist_items WHERE list_id = ?)'),
+        [5]
+      );
+    });
+  });
+
+  describe('GET /api/settings and POST /api/settings', () => {
+    it('should return duplicate filter button setting', async () => {
+      db.getSetting.mockImplementation((key) => {
+        if (key === 'showSongListManagement') return Promise.resolve('true');
+        if (key === 'showDuplicateFilterButton') return Promise.resolve('true');
+        if (key === 'showShortnameColumn') return Promise.resolve('true');
+        return Promise.resolve('false');
+      });
+
+      const response = await request(app)
+        .get('/api/settings')
+        .expect(200);
+
+      expect(response.body).toEqual({
+        showSongListManagement: true,
+        showDuplicateFilterButton: true,
+        showShortnameColumn: true
+      });
+    });
+
+    it('should save duplicate filter button setting', async () => {
+      const response = await request(app)
+        .post('/api/settings')
+        .send({ showSongListManagement: false, showDuplicateFilterButton: true, showShortnameColumn: true })
+        .expect(200);
+
+      expect(db.setSetting).toHaveBeenCalledWith('showSongListManagement', 'false');
+      expect(db.setSetting).toHaveBeenCalledWith('showDuplicateFilterButton', 'true');
+      expect(db.setSetting).toHaveBeenCalledWith('showShortnameColumn', 'true');
+      expect(response.body).toEqual({
+        showSongListManagement: false,
+        showDuplicateFilterButton: true,
+        showShortnameColumn: true
       });
     });
   });

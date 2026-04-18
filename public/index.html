@@ -61,6 +61,7 @@
           <div class="row search-row">
             <input id="searchInput" type="search" placeholder="Search all columns" />
             <div class="random-group">
+              <button id="duplicateFilterButton" class="secondary hidden" title="Show only duplicate songs">Duplicates 👥</button>
               <button id="randomButton" class="primary">Random 🎲</button>
               <button id="randomMenuButton" class="secondary split-button" aria-expanded="false" aria-haspopup="true">▾</button>
               <div id="randomMenu" class="dropdown-menu hidden" role="menu">
@@ -78,6 +79,7 @@
                   <th class="sortable" data-sort="artist">Artist <span class="sort-icon"></span></th>
                   <th class="sortable album-header" data-sort="album">Album <span class="sort-icon"></span></th>
                   <th class="sortable origin-header" data-sort="origin">Origin <span class="sort-icon"></span></th>
+                  <th class="shortname-column">Shortname</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -113,6 +115,14 @@
           <label class="toggle-checkbox">
             <input id="showListManagement" type="checkbox" />
             Enable song list management
+          </label>
+          <label class="toggle-checkbox">
+            <input id="showDuplicateFilterButton" type="checkbox" />
+            Display duplicate filter button
+          </label>
+          <label class="toggle-checkbox">
+            <input id="showShortnameColumn" type="checkbox" />
+            Display shortname column
           </label>
         </div>
         <div class="panel-body config-grid server-panel">

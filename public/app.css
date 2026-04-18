@@ -166,9 +166,23 @@ th.sortable.active {
   color: white;
 }
 
+.primary:hover {
+  background: #2563eb;
+}
+
 .secondary {
   background: rgba(255, 255, 255, 0.08);
   color: #e2e8f0;
+}
+
+.secondary:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.secondary.active {
+  background: rgba(59, 130, 246, 0.3);
+  color: #dbeafe;
+  border-color: rgba(59, 130, 246, 0.5);
 }
 
 .danger {
@@ -623,6 +637,14 @@ td {
   text-align: left;
 }
 
+.shortname-column {
+  display: none;
+}
+
+.shortname-enabled .shortname-column {
+  display: table-cell;
+}
+
 .song-meta {
   display: none;
   margin-top: 4px;
@@ -769,6 +791,10 @@ th:last-child {
 
   .song-meta-secondary {
     display: none;
+  }
+
+  .shortname-column {
+    display: none !important;
   }
 
   .goto-controls {
