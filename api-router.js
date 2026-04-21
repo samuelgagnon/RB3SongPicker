@@ -1,7 +1,8 @@
 const express = require('express');
+const os = require('os');
 
 const MAX_SONGLIST_ITEMS = 5000;
-const ALLOWED_SONG_SORT_COLUMNS = ['title', 'artist', 'album', 'origin', 'picks'];
+const ALLOWED_SONG_SORT_COLUMNS = ['title', 'artist', 'album', 'origin', 'shortname', 'picks'];
 
 function wrapAsync(handler) {
   return (req, res, next) => {
@@ -17,7 +18,7 @@ function normalizeSearchValue(value) {
 }
 
 function songMatchesSearch(song, tokens) {
-  const normalizedFields = [song.title, song.artist, song.album, song.origin].map(normalizeSearchValue);
+  const normalizedFields = [song.shortname, song.title, song.artist, song.album, song.origin].map(normalizeSearchValue);
   return tokens.every((token) => {
     const normalizedToken = normalizeSearchValue(token);
     return normalizedFields.some((fieldValue) => fieldValue.includes(normalizedToken));
@@ -26,6 +27,23 @@ function songMatchesSearch(song, tokens) {
 
 function createApiRouter({ db, configStore, xboxService }) {
   const router = express.Router();
+
+  router.get('/local-url', (req, res) => {
+    const port = req.socket.localPort || 3000;
+    const interfaces = os.networkInterfaces();
+    let localIp = null;
+    for (const iface of Object.values(interfaces)) {
+      for (const addr of iface) {
+        if (addr.family === 'IPv4' && !addr.internal) {
+          localIp = addr.address;
+          break;
+        }
+      }
+      if (localIp) break;
+    }
+    const url = localIp ? `http://${localIp}:${port}/` : null;
+    res.json({ url });
+  });
 
   router.get('/config', wrapAsync(async (req, res) => {
     res.json(configStore.load());
@@ -45,10 +63,12 @@ function createApiRouter({ db, configStore, xboxService }) {
     const showSongListManagement = await db.getSetting('showSongListManagement', 'false');
     const showDuplicateFilterButton = await db.getSetting('showDuplicateFilterButton', 'false');
     const showShortnameColumn = await db.getSetting('showShortnameColumn', 'false');
-    res.json({ 
+    const showExportCsvButton = await db.getSetting('showExportCsvButton', 'false');
+    res.json({
       showSongListManagement: showSongListManagement === 'true',
       showDuplicateFilterButton: showDuplicateFilterButton === 'true',
-      showShortnameColumn: showShortnameColumn === 'true'
+      showShortnameColumn: showShortnameColumn === 'true',
+      showExportCsvButton: showExportCsvButton === 'true'
     });
   }));
 
@@ -56,13 +76,16 @@ function createApiRouter({ db, configStore, xboxService }) {
     const showSongListManagement = req.body.showSongListManagement === true;
     const showDuplicateFilterButton = req.body.showDuplicateFilterButton === true;
     const showShortnameColumn = req.body.showShortnameColumn === true;
+    const showExportCsvButton = req.body.showExportCsvButton === true;
     await db.setSetting('showSongListManagement', showSongListManagement ? 'true' : 'false');
     await db.setSetting('showDuplicateFilterButton', showDuplicateFilterButton ? 'true' : 'false');
     await db.setSetting('showShortnameColumn', showShortnameColumn ? 'true' : 'false');
-    res.json({ 
+    await db.setSetting('showExportCsvButton', showExportCsvButton ? 'true' : 'false');
+    res.json({
       showSongListManagement,
       showDuplicateFilterButton,
-      showShortnameColumn
+      showShortnameColumn,
+      showExportCsvButton
     });
   }));
 

@@ -10,6 +10,7 @@ const state = {
   showSongListManagement: false,
   showDuplicateFilterButton: false,
   showShortnameColumn: false,
+  showExportCsvButton: false,
   filterDuplicates: false,
   saving: false,
   loading: false
@@ -23,7 +24,9 @@ const elements = {
   showListManagement: document.getElementById('showListManagement'),
   showDuplicateFilterButton: document.getElementById('showDuplicateFilterButton'),
   showShortnameColumn: document.getElementById('showShortnameColumn'),
+  showExportCsvButton: document.getElementById('showExportCsvButton'),
   duplicateFilterButton: document.getElementById('duplicateFilterButton'),
+  exportCsvButton: document.getElementById('exportCsvButton'),
   qrImage: document.getElementById('qrImage'),
   searchInput: document.getElementById('searchInput'),
   randomButton: document.getElementById('randomButton'),
@@ -125,10 +128,16 @@ async function loadSettings() {
     const data = await apiFetch('/api/settings');
     state.showSongListManagement = Boolean(data.showSongListManagement);
     state.showDuplicateFilterButton = Boolean(data.showDuplicateFilterButton);
+    state.showShortnameColumn = Boolean(data.showShortnameColumn);
+    state.showExportCsvButton = Boolean(data.showExportCsvButton);
     elements.showListManagement.checked = state.showSongListManagement;
     elements.showDuplicateFilterButton.checked = state.showDuplicateFilterButton;
+    elements.showShortnameColumn.checked = state.showShortnameColumn;
+    elements.showExportCsvButton.checked = state.showExportCsvButton;
     renderSongListOptions();
     updateDuplicateFilterButtonVisibility();
+    updateShortnameColumnVisibility();
+    updateExportButtonVisibility();
   } catch (error) {
     setStatus(`Cannot load settings: ${error.message}`, true);
   }
@@ -136,10 +145,11 @@ async function loadSettings() {
 
 async function saveSettings() {
   try {
-    const payload = { 
+    const payload = {
       showSongListManagement: elements.showListManagement.checked,
       showDuplicateFilterButton: elements.showDuplicateFilterButton.checked,
-      showShortnameColumn: elements.showShortnameColumn.checked
+      showShortnameColumn: elements.showShortnameColumn.checked,
+      showExportCsvButton: elements.showExportCsvButton.checked
     };
     const data = await apiFetch('/api/settings', {
       method: 'POST',
@@ -149,9 +159,11 @@ async function saveSettings() {
     state.showSongListManagement = Boolean(data.showSongListManagement);
     state.showDuplicateFilterButton = Boolean(data.showDuplicateFilterButton);
     state.showShortnameColumn = Boolean(data.showShortnameColumn);
+    state.showExportCsvButton = Boolean(data.showExportCsvButton);
     renderSongListOptions();
     updateDuplicateFilterButtonVisibility();
     updateShortnameColumnVisibility();
+    updateExportButtonVisibility();
     setStatus('Settings saved.');
   } catch (error) {
     setStatus(`Cannot save settings: ${error.message}`, true);
@@ -194,6 +206,66 @@ function updateDuplicateFilterButtonVisibility() {
 function updateShortnameColumnVisibility() {
   if (!elements.songTableWrapper) return;
   elements.songTableWrapper.classList.toggle('shortname-enabled', state.showShortnameColumn);
+}
+
+function updateExportButtonVisibility() {
+  if (!elements.exportCsvButton) return;
+  if (state.showExportCsvButton) {
+    elements.exportCsvButton.classList.remove('hidden');
+    elements.exportCsvButton.style.display = '';
+  } else {
+    elements.exportCsvButton.classList.add('hidden');
+    elements.exportCsvButton.style.display = 'none';
+  }
+}
+
+function escapeCsvValue(value) {
+  const text = String(value ?? '');
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function exportVisibleGridToCsv() {
+  if (!state.songs.length) {
+    setStatus('No songs available to export.', true);
+    return;
+  }
+
+  const columnDefs = [
+    { key: 'title', label: 'Title', selector: 'th[data-sort="title"]' },
+    { key: 'artist', label: 'Artist', selector: 'th[data-sort="artist"]' },
+    { key: 'album', label: 'Album', selector: 'th[data-sort="album"]' },
+    { key: 'origin', label: 'Origin', selector: 'th[data-sort="origin"]' },
+    { key: 'shortname', label: 'Shortname', selector: 'th.shortname-column' }
+  ];
+
+  const visibleColumns = columnDefs.filter((column) => {
+    const header = document.querySelector(column.selector);
+    return header && window.getComputedStyle(header).display !== 'none';
+  });
+
+  if (!visibleColumns.length) {
+    setStatus('No visible columns available to export.', true);
+    return;
+  }
+
+  const rows = [
+    visibleColumns.map((column) => escapeCsvValue(column.label)).join(','),
+    ...state.songs.map((song) =>
+      visibleColumns.map((column) => escapeCsvValue(song[column.key] || '')).join(',')
+    )
+  ];
+
+  const csv = rows.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const downloadLink = document.createElement('a');
+  downloadLink.href = URL.createObjectURL(blob);
+  downloadLink.download = `rb3-songs-${timestamp}.csv`;
+  document.body.append(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  URL.revokeObjectURL(downloadLink.href);
+  setStatus(`Exported ${state.songs.length} songs to CSV.`);
 }
 
 async function loadSongs() {
@@ -568,7 +640,13 @@ function setPage(page) {
     loadSongs();
   } else if (page === 'admin') {
     loadConfig();
-    loadSettings();
+    // Sync admin checkboxes with current in-memory state (set at init and kept
+    // up-to-date by saveSettings). Calling loadSettings() here would overwrite
+    // the current state with a stale server read, unchecking freshly-toggled settings.
+    elements.showListManagement.checked = state.showSongListManagement;
+    elements.showDuplicateFilterButton.checked = state.showDuplicateFilterButton;
+    elements.showShortnameColumn.checked = state.showShortnameColumn;
+    elements.showExportCsvButton.checked = state.showExportCsvButton;
   }
 }
 
@@ -578,7 +656,9 @@ function attachEvents() {
   elements.showListManagement.addEventListener('change', saveSettings);
   elements.showDuplicateFilterButton.addEventListener('change', saveSettings);
   elements.showShortnameColumn.addEventListener('change', saveSettings);
+  elements.showExportCsvButton.addEventListener('change', saveSettings);
   elements.duplicateFilterButton.addEventListener('click', toggleDuplicateFilter);
+  elements.exportCsvButton.addEventListener('click', exportVisibleGridToCsv);
   elements.gotoTop.addEventListener('click', scrollToTop);
   elements.gotoUp.addEventListener('click', () => navigateGroup(-1));
   elements.gotoDown.addEventListener('click', () => navigateGroup(1));
@@ -664,6 +744,10 @@ async function init() {
   if (elements.duplicateFilterButton) {
     elements.duplicateFilterButton.classList.add('hidden');
     elements.duplicateFilterButton.style.display = 'none';
+  }
+  if (elements.exportCsvButton) {
+    elements.exportCsvButton.classList.add('hidden');
+    elements.exportCsvButton.style.display = 'none';
   }
   await loadSettings();
   await loadSongLists();

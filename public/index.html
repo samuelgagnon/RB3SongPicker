@@ -68,6 +68,7 @@
                 <button id="randomUnpopularButton" type="button" role="menuitem">Random unpopular</button>
                 <button id="randomPopularButton" type="button" role="menuitem">Random popular</button>
               </div>
+              <button id="exportCsvButton" class="secondary hidden" title="Export visible grid to CSV">Export CSV ⬇️</button>
             </div>
           </div>
           <div class="sort-buttons hidden" id="sortButtons"></div>
@@ -123,6 +124,10 @@
           <label class="toggle-checkbox">
             <input id="showShortnameColumn" type="checkbox" />
             Display shortname column
+          </label>
+          <label class="toggle-checkbox">
+            <input id="showExportCsvButton" type="checkbox" />
+            Show export to CSV button
           </label>
         </div>
         <div class="panel-body config-grid server-panel">

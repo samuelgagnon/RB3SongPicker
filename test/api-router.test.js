@@ -207,6 +207,7 @@ origin=rb3_dlc
         if (key === 'showSongListManagement') return Promise.resolve('true');
         if (key === 'showDuplicateFilterButton') return Promise.resolve('true');
         if (key === 'showShortnameColumn') return Promise.resolve('true');
+        if (key === 'showExportCsvButton') return Promise.resolve('true');
         return Promise.resolve('false');
       });
 
@@ -217,23 +218,31 @@ origin=rb3_dlc
       expect(response.body).toEqual({
         showSongListManagement: true,
         showDuplicateFilterButton: true,
-        showShortnameColumn: true
+        showShortnameColumn: true,
+        showExportCsvButton: true
       });
     });
 
     it('should save duplicate filter button setting', async () => {
       const response = await request(app)
         .post('/api/settings')
-        .send({ showSongListManagement: false, showDuplicateFilterButton: true, showShortnameColumn: true })
+        .send({
+          showSongListManagement: false,
+          showDuplicateFilterButton: true,
+          showShortnameColumn: true,
+          showExportCsvButton: true
+        })
         .expect(200);
 
       expect(db.setSetting).toHaveBeenCalledWith('showSongListManagement', 'false');
       expect(db.setSetting).toHaveBeenCalledWith('showDuplicateFilterButton', 'true');
       expect(db.setSetting).toHaveBeenCalledWith('showShortnameColumn', 'true');
+      expect(db.setSetting).toHaveBeenCalledWith('showExportCsvButton', 'true');
       expect(response.body).toEqual({
         showSongListManagement: false,
         showDuplicateFilterButton: true,
-        showShortnameColumn: true
+        showShortnameColumn: true,
+        showExportCsvButton: true
       });
     });
   });
