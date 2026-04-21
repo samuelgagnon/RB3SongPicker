@@ -4,6 +4,8 @@
 
 Tired of scrolling through hundreds of songs mid-party while your friends are waiting? **RB3 Song Picker** is your party DJ sidekick — a slick web app that lets you and your crew browse, search, and queue up Rock Band 3 songs from any phone or laptop on the same Wi-Fi. No more hogging the TV menu!
 
+![RB3 Song Picker screenshot](docs/screenshot.png)
+
 ## 🎮 For party hosts & players
 
 ### What can you do with it?
