@@ -24,7 +24,7 @@ Tired of scrolling through hundreds of songs mid-party while your friends are wa
 
 The host loads the song library once — that's it. Every friend who connects instantly sees the full library and all the custom song lists you've created. No setup on their end, no duplicated work. Your "Karaoke Hits" setlist is ready for everyone the moment they join.
 
-### 🎉 Invite your friends to join
+### 👭 Invite your friends to join
 
 No app install needed! Open the **Admin page** (the ⚙️ icon) and show your friends the **QR code** — they just scan it with their phone and they're in. Everyone at the party can browse songs and pick what's next!
 
