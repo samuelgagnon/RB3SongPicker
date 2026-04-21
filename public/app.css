@@ -350,7 +350,7 @@ input[type='search'] {
   height: 100%;
 }
 
-.random-group button:first-child {
+#randomButton {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -403,7 +403,7 @@ input[type='search'] {
   align-items: stretch;
 }
 
-.random-group button:first-child {
+#randomButton {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
